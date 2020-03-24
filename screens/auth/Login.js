@@ -1,5 +1,5 @@
 import React , { useState, useEffect}from 'react';
-import { Alert, StyleSheet, Text, View, Button,TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import {ActivityIndicator, Alert, StyleSheet, Text, View, Button,TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ApiKeys from '../../constants/APIkeys';
@@ -12,9 +12,14 @@ export default function Login({ navigation }){
 
     
     const [login , setlogin] = useState({});
+    const [animate, setAnimate] = useState(false);
+
     const onLogin = () => {
+        Keyboard.dismiss();
+        setAnimate(true);
         firebase.auth().signInWithEmailAndPassword(login.Email, login.Password)
-        .then(() => { navigation.navigate('Home'); Keyboard.dismiss(); setlogin({})}, (error) => { Alert.alert("ERROR", error.message); });
+        .then(() => { setAnimate(false); navigation.navigate('Home', login.Email); Keyboard.dismiss(); setlogin({})}, (error) => { setAnimate(false);Alert.alert("ERROR", error.message); });
+        
     }
     
     return(
@@ -32,6 +37,13 @@ export default function Login({ navigation }){
                 <View style={styles.button}>
                     <Button onPress={onLogin} title="click"></Button>
                 </View>
+                {animate && (
+                    <ActivityIndicator
+                      style={{ height: 80 }}
+                      color="#C00"
+                      size="large"
+                    />
+                  )}
                 <View style={styles.lower}>
                     <Button title="Signup" onPress={() => navigation.navigate('Signup')}/>
                     <Button title="Forgot Password" onPress={() => navigation.navigate('Forgetpassword')} />

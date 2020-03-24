@@ -1,17 +1,19 @@
 import React , { useState, useEffect}from 'react';
-import { Alert, StyleSheet, Text, View, Button,TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import {ActivityIndicator, Alert, StyleSheet, Text, View, Button,TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as firebase from 'firebase';
 
 export default function ForgetPassword({navigation}){
 
+    const [animate, setAnimate] = useState(false);
     const [email, setEmail] = useState();
     const onChange = () => {
+        setAnimate(true);
         firebase.auth().sendPasswordResetEmail(email)
-            .then(() => {
+            .then(() => { setAnimate(false);
                 Alert.alert("Done", "Password reset email has been sent.");
-            }, (error) => {
+            }, (error) => {setAnimate(false);
                 Alert.alert("ERROR", error.message);
             });
     }
@@ -26,6 +28,13 @@ export default function ForgetPassword({navigation}){
                 <View style={styles.button}>
                     <Button onPress={onChange} title="click"></Button>
                 </View>
+                {animate && (
+                    <ActivityIndicator
+                      style={{ height: 80 }}
+                      color="#C00"
+                      size="large"
+                    />
+                  )}
                 <View style={styles.lower}>
                     <Button title="Signup" onPress={() => navigation.navigate('Signup')}/>
                     <Button title="Login" onPress={() => navigation.navigate('Login')}/>
