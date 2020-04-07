@@ -1,25 +1,37 @@
-import React , { useState, useEffect}from 'react';
-import {ActivityIndicator, Alert, StyleSheet, Text, View, Button,TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import ApiKeys from '../../constants/APIkeys';
-
-import * as firebase from 'firebase';
-
-
+import React , {useState}from 'react';
+import {
+    ActivityIndicator, 
+    Alert, StyleSheet, 
+    View, 
+    Button, 
+    TextInput, 
+    TouchableWithoutFeedback, 
+    Keyboard } from 'react-native';
+import {dologin} from '../../firebase/commands';
 
 export default function Login({ navigation }){
-
     
     const [login , setlogin] = useState({});
     const [animate, setAnimate] = useState(false);
-
-    const onLogin = () => {
+    
+    const onLogin = async() => {
+        let uid;
         Keyboard.dismiss();
-        setAnimate(true);
-        firebase.auth().signInWithEmailAndPassword(login.Email, login.Password)
-        .then(() => { setAnimate(false); navigation.navigate('Home', login.Email); Keyboard.dismiss(); setlogin({})}, (error) => { setAnimate(false);Alert.alert("ERROR", error.message); });
-        
+        if(login.Email != null && login.Password != null){
+            setAnimate(true);
+            try{
+            uid = await dologin(login.Email, login.Password); 
+            navigation.navigate('Home',{uid: uid});
+            setlogin({});
+            }catch(error){
+                Alert.alert("ERROR",error.toString());
+            }
+            setAnimate(false);
+        }
+        else{
+            Alert.alert("Invalid Credentials","Email and Password must not be empty");
+        }
+
     }
     
     return(
@@ -35,7 +47,7 @@ export default function Login({ navigation }){
                 autoCapitalize="none"
                 autoCorrect={false}/>
                 <View style={styles.button}>
-                    <Button onPress={onLogin} title="click"></Button>
+                    <Button onPress={onLogin} title="Login"></Button>
                 </View>
                 {animate && (
                     <ActivityIndicator

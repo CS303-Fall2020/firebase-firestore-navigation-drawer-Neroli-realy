@@ -1,15 +1,19 @@
 import React , { useState}from 'react';
-import {ActivityIndicator, Alert, StyleSheet, Text, View, Button,TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import * as firebase from 'firebase';
-import Login from './Login';
+import {
+    ActivityIndicator, 
+    Alert, StyleSheet, 
+    View, 
+    Button, 
+    TextInput, 
+    TouchableWithoutFeedback, 
+    Keyboard } from 'react-native';
+import {dosignup} from '../../firebase/commands';
 
 export default function Signup({ navigation }){
     const [signup, setsignup] = useState({});
     const [animate, setAnimate] = useState(false);
-    const onSignup = () => {
-        
+
+    const onSignup = async() => {
         if (signup.Password !== signup.Confirm) {
             Alert.alert("Error", "Passwords do not match");
             return;
@@ -17,12 +21,18 @@ export default function Signup({ navigation }){
         if(signup.Password != null){
             Keyboard.dismiss();
             setAnimate(true);
-        firebase.auth().createUserWithEmailAndPassword(signup.Email, signup.Password)
-            .then(() => { setAnimate(false); navigation.navigate('Home', signup.Email); Keyboard.dismiss(); setsignup({})}, (error) => { setAnimate(false); Alert.alert("ERROR",error.message); });
+            try{
+                let uid = await dosignup(signup.Email, signup.Password);
+                navigation.navigate('Home', {uid: uid});
+                console.log(uid);
+            }catch(error){
+                Alert.alert("ERROR", error);
+            }
         }
         else{ Alert.alert("ERROR", "Password cannot be empty")}
-        
+        setAnimate(false);
     }
+    
     return(
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.upper}>
@@ -49,7 +59,7 @@ export default function Signup({ navigation }){
             onChangeText={(text) => setsignup({Email: signup.Email, Password:signup.Password, Confirm:text})}/>
             
             <View style={styles.button}>
-                <Button onPress={onSignup} title="click"></Button>
+                <Button onPress={onSignup} title="SignUp"></Button>
             </View>
             
             <View style={styles.lower}>

@@ -1,21 +1,33 @@
-import React , { useState, useEffect}from 'react';
-import {ActivityIndicator, Alert, StyleSheet, Text, View, Button,TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import * as firebase from 'firebase';
+import React , { useState }from 'react';
+import {
+    ActivityIndicator, 
+    Alert, 
+    StyleSheet, 
+    View, 
+    Button, 
+    TextInput, 
+    TouchableWithoutFeedback, 
+    Keyboard } from 'react-native';
+import {resetPassword} from '../../firebase/commands';
 
 export default function ForgetPassword({navigation}){
-
     const [animate, setAnimate] = useState(false);
     const [email, setEmail] = useState();
-    const onChange = () => {
-        setAnimate(true);
-        firebase.auth().sendPasswordResetEmail(email)
-            .then(() => { setAnimate(false);
-                Alert.alert("Done", "Password reset email has been sent.");
-            }, (error) => {setAnimate(false);
-                Alert.alert("ERROR", error.message);
-            });
+
+    const onChange = async() => {
+        Keyboard.dismiss();
+        if(email != null){
+            setAnimate(true);
+            try{
+               let response = await resetPassword(email);
+               Alert.alert("Done", response);
+            }catch(error){
+                Alert.alert("ERROR", error);
+            }
+        }else{
+            Alert.alert("ERROR", "Invalid Email");
+        }
+        setAnimate(false);
     }
     return(
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -26,7 +38,7 @@ export default function ForgetPassword({navigation}){
                 value={email}
                 onChangeText={(text) => setEmail(text)}/>
                 <View style={styles.button}>
-                    <Button onPress={onChange} title="click"></Button>
+                    <Button onPress={onChange} title="Request Password"></Button>
                 </View>
                 {animate && (
                     <ActivityIndicator

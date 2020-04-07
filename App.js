@@ -1,20 +1,26 @@
 import React , { useState, useEffect}from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet,TouchableOpacity,Image, Text, View, Button, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import ApiKeys from './constants/APIkeys';
-import * as firebase from 'firebase';
+import firebase from 'firebase';
 import Login from './screens/auth/Login';
 import Signup from './screens/auth/Signup';
 import ForgetPassword from './screens/auth/ForgetPassword';
-import Home from './screens/Todo/Home';
+import Home from './screens/Todo/App';
+import Details from './screens/Todo/screens/Details';
+import {signout, init} from './firebase/commands';
+
 
 const Stack = createStackNavigator();
 
+let x = {};
 export default function App() {
+  const test = (navigation) => {
+     x = navigation;
+  }
   
   useEffect(() => {
-    if (!firebase.apps.length) { firebase.initializeApp(ApiKeys.FirebaseConfig); }
+    init();
   }
 )
   return (
@@ -34,12 +40,29 @@ export default function App() {
         options={{
           headerLeft: () => {}
         }}/>
+
         <Stack.Screen 
         name="Home"
         component={Home}
+        initialParams={{test: test}}
         options={{
-          headerLeft: () => {}
-        }}/>
+          headerLeft: () =>(
+            <TouchableOpacity onPress={() =>{x.toggleDrawer()}}>
+              <Image style={{width: 30, height: 30, marginLeft: 10}} source={require('./assets/drawer.png')}/>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={() => {signout(); x.navigate('Login')}}>
+            <Text style={{textDecorationLine: "underline", fontSize: 20}}>Signout</Text>
+            </TouchableOpacity>
+          )
+        }}
+        >
+        </Stack.Screen>
+        <Stack.Screen 
+        name="Details"
+        component={Details}
+        />
        </Stack.Navigator>
     </NavigationContainer>
   );
